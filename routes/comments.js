@@ -1,4 +1,8 @@
-app.post("/videos/:id/comments", (req, res) => {
+const express = require("express");
+const fs = require("fs");
+const router = express.Router();
+
+router.post("/videos/:id/comments", (req, res) => {
   const requestBody = req.body;
   fs.readFile("./data/videos.json", (err, data) => {
     if (err) return console.log(err);
@@ -20,7 +24,7 @@ app.post("/videos/:id/comments", (req, res) => {
   });
 });
 
-app.delete("/videos/:id/comments/:commentId", (req, res) => {
+router.delete("/videos/:id/comments/:commentId", (req, res) => {
   fs.readFile("./data/videos.json", (err, data) => {
     if (err) return console.log(err);
     const videoDetail = JSON.parse(data);
@@ -44,3 +48,5 @@ app.delete("/videos/:id/comments/:commentId", (req, res) => {
     });
   });
 });
+
+module.exports = router;

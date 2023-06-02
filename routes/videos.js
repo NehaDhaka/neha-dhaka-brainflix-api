@@ -1,20 +1,25 @@
-app.get("/videos", (req, res) => {
+const express = require("express");
+const fs = require("fs");
+const { v4: uuidv4 } = require("uuid");
+const router = express.Router();
+
+router.get("/videos", (req, res) => {
   fs.readFile("./data/videos.json", (err, data) => {
     if (err) return err;
     const videosDetail = JSON.parse(data);
     const videoList = videosDetail.map((video) => {
       return {
-        id: "84e96018-4022-434e-80bf-000ce4cd12b8",
-        title: "BMX Rampage: 2021 Highlights",
-        channel: "Red Cow",
-        image: "https://i.imgur.com/l2Xfgpl.jpg",
+        id: video.id,
+        title: video.title,
+        channel: video.channel,
+        image: video.image,
       };
     });
     res.status(200).send(videoList);
   });
 });
 
-app.get("/videos/:id", (req, res) => {
+router.get("/videos/:id", (req, res) => {
   fs.readFile("./data/videos.json", (err, data) => {
     if (err) return err;
     const videosDetail = JSON.parse(data);
@@ -25,7 +30,7 @@ app.get("/videos/:id", (req, res) => {
   });
 });
 
-app.post("/videos", (req, res) => {
+router.post("/videos", (req, res) => {
   const requestBody = req.body;
   fs.readFile("./data/videos.json", (err, data) => {
     if (err) return console.log(err);
@@ -37,3 +42,5 @@ app.post("/videos", (req, res) => {
     });
   });
 });
+
+module.exports = router;
