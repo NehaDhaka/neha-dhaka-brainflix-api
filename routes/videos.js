@@ -1,45 +1,49 @@
 const express = require("express");
 const fs = require("fs");
 const { v4: uuidv4 } = require("uuid");
+
+const { loadData } = require("../utils/dataLoader");
+const { requestedVideo } = require("../utils/videoPicker");
+
 const router = express.Router();
 
-router.get("/videos", (req, res) => {
-  fs.readFile("./data/videos.json", (err, data) => {
-    if (err) return err;
-    const videosDetail = JSON.parse(data);
-    const videoList = videosDetail.map((video) => {
-      return {
-        id: video.id,
-        title: video.title,
-        channel: video.channel,
-        image: video.image,
-      };
-    });
-    res.status(200).send(videoList);
-  });
+router.get("/", (req, res) => {
+  const videos = loadData();
+  const videoList = videos.map((video) => ({
+    id: video.id,
+    title: video.title,
+    channel: video.channel,
+    image: video.image,
+  }));
+  res.status(200).send(videoList);
 });
 
-router.get("/videos/:id", (req, res) => {
-  fs.readFile("./data/videos.json", (err, data) => {
-    if (err) return err;
-    const videosDetail = JSON.parse(data);
-    const requestedVideo = videosDetail.find(
-      (video) => req.params.id === video.id
-    );
-    res.status(200).send(requestedVideo);
-  });
+router.get("/:id", (req, res) => {
+  const videos = loadData();
+  const video = requestedVideo(videos, req);
+  res.status(200).send(video);
 });
 
-router.post("/videos", (req, res) => {
-  const requestBody = req.body;
-  fs.readFile("./data/videos.json", (err, data) => {
+router.post("/", (req, res) => {
+  const { title, description } = req.body;
+  const videos = loadData();
+  const newVideo = {
+    id: uuidv4(),
+    title: title,
+    channel: "Neha Dhaka",
+    image: "https://i.imgur.com/i6S8m7I.jpg",
+    description: description,
+    views: "3,092,284",
+    likes: "75,985",
+    duration: "4:20",
+    video: "https://project-2-api.herokuapp.com/stream",
+    timestamp: Date.now(),
+    comments: [],
+  };
+  videos.push(newVideo);
+  fs.writeFile("./data/videos.json", JSON.stringify(videos), (err) => {
     if (err) return console.log(err);
-    const videosDetail = JSON.parse(data);
-    videosDetail.push(requestBody);
-    fs.writeFile("./data/videos.json", JSON.stringify(videosDetail), (err) => {
-      if (err) return console.log(err);
-      res.status(201).send(requestBody);
-    });
+    res.status(201).send(newVideo);
   });
 });
 

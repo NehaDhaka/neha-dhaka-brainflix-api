@@ -8,8 +8,9 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
-app.use("", commentRoutes);
-app.use("", videoRoutes);
+app.use(express.static("public"));
+app.use("/videos", commentRoutes);
+app.use("/videos", videoRoutes);
 
 app.listen(8080, () => {
   console.log("Hello, world!");
