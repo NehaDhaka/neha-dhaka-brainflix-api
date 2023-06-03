@@ -1,6 +1,18 @@
 const express = require("express");
 const fs = require("fs");
 const { v4: uuidv4 } = require("uuid");
+const multer = require("multer");
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "./public/images");
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.originalname);
+  },
+});
+
+const upload = multer({ storage: storage });
 
 const { loadData } = require("../utils/dataLoader");
 const { requestedVideo } = require("../utils/videoPicker");
@@ -24,14 +36,16 @@ router.get("/:id", (req, res) => {
   res.status(200).send(video);
 });
 
-router.post("/", (req, res) => {
+router.post("/", upload.single("image"), (req, res) => {
   const { title, description } = req.body;
+  const imageName = req.file ? req.file.originalname : "placeholder.jpg";
+  console.log(req.file);
   const videos = loadData();
   const newVideo = {
     id: uuidv4(),
     title: title,
     channel: "Neha Dhaka",
-    image: "https://i.imgur.com/i6S8m7I.jpg",
+    image: `http://localhost:8080/images/${imageName}`,
     description: description,
     views: "3,092,284",
     likes: "75,985",
@@ -44,6 +58,22 @@ router.post("/", (req, res) => {
   fs.writeFile("./data/videos.json", JSON.stringify(videos), (err) => {
     if (err) return console.log(err);
     res.status(201).send(newVideo);
+  });
+});
+
+router.put("/:id/likes", (req, res) => {
+  const videos = loadData();
+  const video = requestedVideo(videos, req);
+  const videoIndex = videos.indexOf(video);
+
+  const likesNum = Number(video.likes.replace(",", ""));
+  video.likes = (likesNum + 1).toLocaleString();
+
+  videos[videoIndex] = video;
+
+  fs.writeFile("./data/videos.json", JSON.stringify(videos), (err) => {
+    if (err) return console.log(err);
+    res.status(200).send(likesNum.toLocaleString());
   });
 });
 
