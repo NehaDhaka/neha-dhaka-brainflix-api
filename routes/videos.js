@@ -39,7 +39,6 @@ router.get("/:id", (req, res) => {
 router.post("/", upload.single("image"), (req, res) => {
   const { title, description } = req.body;
   const imageName = req.file ? req.file.originalname : "placeholder.jpg";
-  console.log(req.file);
   const videos = loadData();
   const newVideo = {
     id: uuidv4(),
